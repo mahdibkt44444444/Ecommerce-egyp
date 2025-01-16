@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  CircularProgress,
   Container,
   Dialog,
   IconButton,
@@ -22,7 +23,9 @@ import ProductDetails from "./ProductDetails";
 import { useGetproductByNameQuery } from "../../Redux/product";
 const Main = () => {
   const handleAlignment = (event, newValue) => {
-    setmyData(newValue);
+    if (newValue !== null) {
+      setmyData(newValue);
+    }
   };
 
   const theme = useTheme();
@@ -45,23 +48,28 @@ const Main = () => {
 
   const [myData, setmyData] = useState(allProductsAPI);
   const { data, error, isLoading } = useGetproductByNameQuery(myData);
-
-  if (data) {
-    console.log(data.data);
-  }
+  const [clickedProduct, setclickedProduct] = useState();
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <Box sx={{ display: "flex", py: 11, textAlign: "center" }}>
+        <CircularProgress />
+      </Box>
+    );
   }
 
   if (error) {
     return (
-      <div>
-        {
-          // @ts-ignore
-          error.message
-        }
-      </div>
+      <Container>
+        <Typography variant="h6">
+          {
+            // @ts-ignore
+            error.error
+          }
+        </Typography>
+
+        <Typography variant="h6">Please try again later</Typography>
+      </Container>
     );
   }
 
@@ -133,7 +141,7 @@ const Main = () => {
           {data.data.map((item) => {
             return (
               <Card
-                key={item}
+                key={item.id}
                 sx={{
                   maxWidth: 333,
                   mt: 6,
@@ -172,7 +180,11 @@ const Main = () => {
 
                 <CardActions sx={{ justifyContent: "space-between" }}>
                   <Button
-                    onClick={handleClickOpen}
+                    onClick={() => {
+                      handleClickOpen();
+                      setclickedProduct(item);
+                      console.log(item);
+                    }}
                     sx={{ textTransform: "capitalize" }}
                     size="large"
                   >
@@ -213,7 +225,7 @@ const Main = () => {
             <Close />
           </IconButton>
 
-          <ProductDetails />
+          <ProductDetails clickedProduct={clickedProduct} />
         </Dialog>
       </Container>
     );
